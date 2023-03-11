@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const url = require('url'); 
 const dns = require('node:dns');
+const mongoose = require('mongoose')
+
 const app = express();
 
 // Basic Configuration
@@ -19,9 +21,12 @@ app.get('/', function(req, res) {
 });
 
 
-
 // DATABASE
 
+mongoose.connect(`mongodb+srv://${username}:${password}@cluster0.rjheeqq.mongodb.net/?retryWrites=true&w=majority`,
+  (err) => {
+    if (err) throw err;
+});
 
 
 // ROUTES
