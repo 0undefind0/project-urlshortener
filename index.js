@@ -22,11 +22,12 @@ app.get('/', function(req, res) {
 
 
 // DATABASE
+try {
+  mongoose.connect(`mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster0.rjheeqq.mongodb.net/?retryWrites=true&w=majority`);
+} catch(err) {
+  console.error(err);
+}
 
-mongoose.connect(`mongodb+srv://${username}:${password}@cluster0.rjheeqq.mongodb.net/?retryWrites=true&w=majority`,
-  (err) => {
-    if (err) throw err;
-});
 
 
 // ROUTES
