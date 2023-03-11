@@ -4,6 +4,7 @@ const cors = require('cors');
 const url = require('url'); 
 const dns = require('node:dns');
 const mongoose = require('mongoose')
+const shortId = require('shortid')
 
 const app = express();
 
@@ -20,6 +21,8 @@ app.get('/', function(req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
+// TODO: Implement caching of URLs using Hashmap??
+
 
 // DATABASE
 try {
@@ -27,6 +30,13 @@ try {
 } catch(err) {
   console.error(err);
 }
+
+const urlSchema = new mongoose.Schema({
+  "original_url": String,
+  "short_url": {type: String, unique: true},
+});
+
+const urlModel = mongoose.model('URL', urlSchema);
 
 
 
@@ -54,9 +64,38 @@ app.post('/api/shorturl', function(req, res) {
       return;
     };
 
-    response.original_url = original_url;
-    response.short_url = '??'
-    res.json(response);
+    // Save to database and Return saved content
+    // Check first if url already exists within database
+    urlModel.findOne({ "original_url": original_url }).exec()
+      
+      .then(
+        (foundUrl) => {
+          // return already existing URL from database
+          if (foundUrl) {
+            response.original_url = foundUrl.original_url;
+            response.short_url = foundUrl.short_url;
+          }
+          // if URL in database does not exist then create new one and respond with the result
+          else {
+            const newUrl = new urlModel({
+              "original_url": original_url,
+              "short_url": shortId.generate(),
+            })
+            response.original_url = newUrl.original_url;
+            response.short_url = newUrl.short_url;
+            newUrl.save()
+          }
+        }
+      )
+      .catch(
+        (err) => {
+          console.error(err);
+        }
+      )
+      .finally(
+        () => res.json(response)
+      );
+
     return
   });
 
