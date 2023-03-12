@@ -27,7 +27,7 @@ app.get('/', function(req, res) {
 
 // DATABASE
 try {
-  mongoose.connect(`mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster0.rjheeqq.mongodb.net/?retryWrites=true&w=majority`);
+  mongoose.connect(`mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster0.rjheeqq.mongodb.net/fcc?retryWrites=true&w=majority`);
 } catch(err) {
   console.error(err);
 }
