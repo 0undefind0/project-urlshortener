@@ -5,6 +5,7 @@ const url = require('url');
 const dns = require('node:dns');
 const mongoose = require('mongoose')
 const shortId = require('shortid')
+const validUrl = require('valid-url')
 
 const app = express();
 
@@ -77,12 +78,22 @@ app.get('/api/shorturl/:short_url', function(req, res) {
 // todo: Save URL when URL is new
 // todo: Return short_url id if URL already exists
 app.post('/api/shorturl', function(req, res) {
-  const original_url = req.body.url;
-  let url_hostname = url.parse(original_url).hostname;
-  url_hostname = url_hostname.replace(/www./, ''); // remove the "www." at the beginning of the url
-
   let response = {};
 
+  const original_url = req.body.url;
+  let url_hostname = url.parse(original_url).hostname;
+
+  // Validate URL string if proper
+  if (!validUrl.isWebUri(original_url)) {
+    
+    response.error = 'invalid url'
+    res.json(response);
+    return;
+  }
+
+  url_hostname = url_hostname.replace(/www./, ''); // remove the "www." at the beginning of the url
+
+  // Check if register in DNS
   dns.lookup(url_hostname, function(err, address, family)  {
     // Respond invalid url when Hostname is unreachable
     if (err) {
