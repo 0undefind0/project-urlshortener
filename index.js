@@ -47,6 +47,33 @@ app.get('/api/hello', function(req, res) {
   res.json({ greeting: 'hello API' });
 });
 
+
+/** 
+ * Route /api/shorturl/<short_url> fetches URL with <short_url> as key
+ * TODO: When you visit /api/shorturl/<short_url>, you will be redirected to the original URL.
+ * @param short_url The route parameter identifies a unique string linked to a URL 
+*/
+app.get('/api/shorturl/:short_url', function(req, res) {
+  const requestUrl = req.params.short_url;
+  let response = {};
+
+  urlModel.findOne({ "short_url": requestUrl }).exec()
+    .then(
+      (foundUrl) => {
+        if (foundUrl) {
+          res.redirect(foundUrl.original_url);
+        } else {
+          res.json( {"error": "No short URL found for the given input"} );
+        }
+    })
+    .catch(
+      (err) => {
+        console.error(err);
+      }
+    )
+});
+
+
 // todo: Save URL when URL is new
 // todo: Return short_url id if URL already exists
 app.post('/api/shorturl', function(req, res) {
@@ -67,15 +94,12 @@ app.post('/api/shorturl', function(req, res) {
     // Save to database and Return saved content
     // Check first if url already exists within database
     urlModel.findOne({ "original_url": original_url }).exec()
-      
       .then(
         (foundUrl) => {
-          // return already existing URL from database
           if (foundUrl) {
             response.original_url = foundUrl.original_url;
             response.short_url = foundUrl.short_url;
           }
-          // if URL in database does not exist then create new one and respond with the result
           else {
             const newUrl = new urlModel({
               "original_url": original_url,
